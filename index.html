@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRYCdown</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --pink: #ed125f;
+    --pink-light: #f2598f;
+    --pink-faint: #fde7ef;
+    --black: #000000;
+    --white: #ffffff;
+    --gray-100: #f5f5f5;
+    --gray-200: #e8e8e8;
+    --gray-400: #999999;
+    --gray-700: #444444;
+    --g8-primary: #f0c917;   --g8-mid: #fce584;   --g8-dark: #7a6000;
+    --g910-primary: #e9be30; --g910-mid: #f9dd53; --g910-dark: #7a5e00;
+    --g11-primary: #e06326;  --g11-mid: #f6d0bb;  --g11-dark: #9e4723;
+    --g12-primary: #00775f;  --g12-mid: #d3ebe7;  --g12-dark: #061b17;
+    --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+    --wrap: min(1100px, 100%);
+    --pad: clamp(1rem, 4vw, 2rem);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font); background: var(--white); color: var(--black); font-size: 16px; line-height: 1.6; }
+
+  /* ─── NAV ─── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--black); display: flex; align-items: stretch;
+    padding: 0 var(--pad); height: 52px; border-bottom: 3px solid var(--pink);
+  }
+  .nav-logo {
+    font-size: 13px; font-weight: 700; color: var(--white);
+    letter-spacing: 0.14em; text-transform: uppercase;
+    margin-right: 1rem; text-decoration: none; flex-shrink: 0; display: flex; align-items: center;
+  }
+  .nav-scroll { display: flex; overflow-x: auto; gap: 0; flex: 1; scrollbar-width: none; }
+  .nav-scroll::-webkit-scrollbar { display: none; }
+  .nav-links { display: flex; gap: 0; list-style: none; }
+  .nav-links a {
+    display: flex; align-items: center; padding: 0 0.8rem; height: 52px;
+    font-size: 11px; font-weight: 700; color: var(--gray-400);
+    text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+    border-bottom: 3px solid transparent; margin-bottom: -3px; transition: color 0.15s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-links a.active                { color: var(--white);          border-bottom-color: var(--pink); }
+  .nav-links a.g8.active   { color: var(--g8-primary);   border-bottom-color: var(--g8-primary); }
+  .nav-links a.g910.active { color: var(--g910-primary);  border-bottom-color: var(--g910-primary); }
+  .nav-links a.g11.active  { color: var(--g11-primary);   border-bottom-color: var(--g11-primary); }
+  .nav-links a.g12.active  { color: var(--g12-primary);   border-bottom-color: var(--g12-primary); }
+
+  /* ─── PAGES ─── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ─── MARQUEE ─── */
+  .announce-band { background: var(--pink); padding: 0.5rem 0; overflow: hidden; white-space: nowrap; }
+  .announce-inner { display: inline-flex; gap: 2.5rem; animation: marquee 40s linear infinite; }
+  @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+  .announce-item { font-size: 11px; font-weight: 700; color: var(--white); letter-spacing: 0.07em; text-transform: uppercase; }
+  .announce-item::before { content: "★"; margin-right: 0.4rem; opacity: 0.6; }
+
+  /* ─── CT WIDGET ─── */
+  .ct-widget { background: var(--black); border-top: 1px solid #1a1a1a; }
+  .ct-widget-inner {
+    max-width: var(--wrap); margin: 0 auto; padding: 0.6rem var(--pad);
+    display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  }
+  .ct-widget-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-400); flex-shrink: 0; }
+  .ct-widget-label span { color: var(--pink); }
+  .ct-btn { display: inline-block; padding: 5px 12px; border-radius: 4px; font-size: 11px; font-weight: 700; text-decoration: none; letter-spacing: 0.03em; white-space: nowrap; transition: opacity 0.15s; }
+  .ct-btn:hover { opacity: 0.85; }
+  .ct-btn-primary { background: var(--pink); color: var(--white); }
+  .ct-btn-outline { border: 1.5px solid #444; color: var(--gray-400); }
+  .ct-btn-outline:hover { border-color: var(--white); color: var(--white); }
+  .ct-note { font-size: 10px; color: #555; margin-left: auto; }
+  .ct-note a { color: #555; text-decoration: underline; cursor: pointer; }
+
+  /* ─── CONTENT WRAPPER ─── */
+  .content-wrap { max-width: var(--wrap); margin: 0 auto; padding: clamp(1.5rem,4vw,2.5rem) var(--pad); }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--black); }
+  .section-header h2 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; }
+  .section-header a { font-size: 11px; color: var(--pink); text-decoration: none; font-weight: 700; }
+
+  /* ─── HOME HERO ─── */
+  .home-hero { background: var(--black); padding: clamp(2rem,6vw,3.5rem) var(--pad); }
+  .home-hero-inner { max-width: var(--wrap); margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: center; }
+  .home-hero h1 { font-size: clamp(2rem,5vw,3.2rem); font-weight: 700; color: var(--white); line-height: 1.05; letter-spacing: -0.02em; }
+  .home-hero h1 span { color: var(--pink); }
+  .home-hero p { color: var(--gray-400); font-size: clamp(13px,2vw,15px); margin-top: 0.65rem; line-height: 1.7; }
+  .hero-grade-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hero-grade-card { border-radius: 9px; padding: 0.85rem 1rem; cursor: pointer; transition: transform 0.15s, opacity 0.15s; text-decoration: none; }
+  .hero-grade-card:hover { transform: translateY(-2px); opacity: 0.9; }
+  .hero-grade-card .gl { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.65; }
+  .hero-grade-card .gn { font-size: clamp(13px,2vw,15px); font-weight: 700; margin-top: 2px; }
+  .hgc-8   { background: var(--g8-primary);   color: var(--black); }
+  .hgc-910 { background: var(--g910-primary);  color: var(--black); }
+  .hgc-11  { background: var(--g11-primary);   color: var(--white); }
+  .hgc-12  { background: var(--g12-primary);   color: var(--white); }
+
+  /* ─── GRADE HERO ─── */
+  .grade-hero { padding: clamp(1.5rem,4vw,2.25rem) var(--pad); border-bottom: 2px solid var(--black); }
+  .grade-hero-inner { max-width: var(--wrap); margin: 0 auto; display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; }
+  .grade-badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-bottom: 6px; }
+  .grade-hero h1 { font-size: clamp(1.8rem,5vw,2.6rem); font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; }
+  .grade-hero p { font-size: clamp(12px,2vw,14px); margin-top: 0.35rem; max-width: 400px; }
+  .grade-quick-links { display: flex; gap: 7px; flex-wrap: wrap; align-items: flex-start; padding-top: 4px; }
+  .quick-link { display: inline-block; padding: 6px 13px; border: 2px solid currentColor; border-radius: 5px; font-size: 11px; font-weight: 700; text-decoration: none; white-space: nowrap; transition: background 0.15s, color 0.15s; }
+
+  /* ─── RESOURCE CARDS ─── */
+  .resource-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(180px,100%),1fr)); gap: 8px; margin-bottom: 2rem; }
+  .resource-card { border: 1.5px solid var(--black); border-radius: 7px; padding: 0.9rem 1rem; text-decoration: none; color: var(--black); transition: transform 0.12s; display: block; }
+  .resource-card:hover { transform: translateY(-2px); }
+  .rc-tag  { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--pink); margin-bottom: 3px; }
+  .rc-title { font-size: 13px; font-weight: 700; line-height: 1.3; }
+  .rc-desc  { font-size: 11px; color: var(--gray-700); margin-top: 3px; line-height: 1.5; }
+  .rc-arrow { display: inline-block; margin-top: 6px; font-size: 15px; color: var(--pink); }
+
+  /* ─── SHOUTOUTS ─── */
+  .shoutout-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 0.75rem; scrollbar-width: none; margin-bottom: 2rem; }
+  .shoutout-strip::-webkit-scrollbar { display: none; }
+  .shoutout-card { flex-shrink: 0; width: 165px; border-radius: 9px; overflow: hidden; border: 2px solid var(--card-accent, var(--pink)); }
+  .shoutout-photo { width: 100%; height: 140px; object-fit: cover; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+  .shoutout-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .shoutout-body  { padding: 0.6rem 0.7rem; background: var(--white); }
+  .shoutout-name  { font-size: 12px; font-weight: 700; }
+  .shoutout-grade { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 1px; }
+  .shoutout-quote { font-size: 11px; color: var(--gray-700); margin-top: 3px; line-height: 1.4; font-style: italic; }
+
+  /* ─── SCHEDULE BLOCK ─── */
+  .schedule-embed { border: 1.5px solid var(--black); border-radius: 7px; overflow: hidden; margin-bottom: 2rem; }
+  .schedule-header { padding: 0.6rem 1rem; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+  .schedule-body  { padding: 0.85rem; display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .schedule-day { background: var(--gray-100); border-radius: 5px; padding: 0.6rem 0.7rem; }
+  .schedule-day-name { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-700); margin-bottom: 3px; }
+  .schedule-day-time { font-size: clamp(11px,2vw,13px); font-weight: 700; font-family: var(--mono); }
+  .schedule-day-loc  { font-size: 11px; color: var(--gray-700); margin-top: 2px; }
+
+  /* ─── HOME 2-COL ─── */
+  .home-2col { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+  .update-item { padding: 0.75rem 0; border-bottom: 1px solid var(--gray-200); }
+  .update-item:last-child { border-bottom: none; }
+  .update-date  { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pink); font-family: var(--mono); }
+  .update-title { font-size: 13px; font-weight: 700; margin-top: 2px; line-height: 1.4; }
+  .update-body  { font-size: 12px; color: var(--gray-700); margin-top: 2px; }
+  .sidebar-links { display: flex; flex-direction: column; gap: 6px; }
+  .sidebar-link { display: flex; align-items: center; gap: 8px; padding: 0.6rem 0.85rem; border: 1.5px solid var(--gray-200); border-radius: 6px; text-decoration: none; color: var(--black); font-size: 12px; font-weight: 600; transition: border-color 0.15s, color 0.15s; }
+  .sidebar-link:hover { border-color: var(--pink); color: var(--pink); }
+  .sidebar-link-icon { font-size: 15px; flex-shrink: 0; }
+
+  /* ─── OPPORTUNITIES ─── */
+  .opp-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--gray-400); margin: 1.75rem 0 0.65rem; padding-bottom: 0.35rem; border-bottom: 1px solid var(--gray-200); }
+  .opp-item { display: grid; grid-template-columns: 1fr auto; gap: 0.85rem; align-items: start; padding: 0.9rem 1rem; border: 1.5px solid var(--gray-200); border-radius: 7px; text-decoration: none; color: var(--black); transition: border-color 0.15s, background 0.15s; margin-bottom: 7px; }
+  .opp-item:hover { border-color: var(--pink); background: var(--pink-faint); }
+  .opp-title   { font-size: 13px; font-weight: 700; }
+  .opp-org     { font-size: 11px; color: var(--gray-700); margin-top: 2px; }
+  .opp-details { font-size: 11px; color: var(--gray-700); margin-top: 4px; line-height: 1.5; }
+  .opp-meta    { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+  .opp-tag     { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; padding: 2px 8px; border-radius: 20px; border: 1.5px solid currentColor; white-space: nowrap; }
+  .opp-deadline { font-size: 10px; font-weight: 700; font-family: var(--mono); white-space: nowrap; }
+  .opp-deadline.urgent { color: var(--pink); }
+
+  /* ─── FYT BANNER ─── */
+  .fyt-banner { background: var(--black); border-radius: 8px; padding: 1.1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
+  .fyt-banner h3 { font-size: 14px; font-weight: 700; color: var(--white); }
+  .fyt-banner p  { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+  .fyt-btns { display: flex; gap: 7px; flex-wrap: wrap; }
+  .fyt-btn { display: inline-block; padding: 6px 13px; border-radius: 5px; font-size: 11px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+  .fyt-btn-pink    { background: var(--pink); color: var(--white); }
+  .fyt-btn-outline { border: 1.5px solid #555; color: var(--gray-400); }
+  .fyt-btn-outline:hover { border-color: var(--white); color: var(--white); }
+
+  /* ─── CT PAGE ─── */
+  .ct-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+  .ct-card { border: 1.5px solid var(--black); border-radius: 8px; overflow: hidden; }
+  .ct-card-header { padding: 0.65rem 1rem; background: var(--black); color: var(--white); }
+  .ct-card-header h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+  .ct-card-body { padding: 1rem; }
+  .ct-card-body p   { font-size: 13px; color: var(--gray-700); line-height: 1.6; margin-bottom: 0.65rem; }
+  .ct-card-body ul  { padding-left: 1rem; font-size: 13px; color: var(--gray-700); line-height: 1.75; margin-bottom: 0.65rem; }
+  .ct-card-body a   { color: var(--pink); text-decoration: none; font-weight: 600; }
+  .ct-card-body a:hover { text-decoration: underline; }
+  .ct-cta { display: inline-block; margin-top: 0.4rem; padding: 7px 16px; background: var(--pink); color: var(--white); border-radius: 5px; font-size: 12px; font-weight: 700; text-decoration: none; }
+  .ct-cta:hover { opacity: 0.85; }
+  .ct-policy { background: var(--gray-100); border-radius: 5px; padding: 0.65rem 0.85rem; font-size: 12px; color: var(--gray-700); margin-top: 0.65rem; line-height: 1.5; }
+  .ct-policy strong { color: var(--black); }
+  .tutor-resource-list { display: flex; flex-direction: column; gap: 6px; margin-top: 0.4rem; }
+  .tutor-resource-link { display: flex; align-items: center; gap: 8px; padding: 0.55rem 0.85rem; border: 1.5px solid var(--gray-200); border-radius: 6px; text-decoration: none; color: var(--black); font-size: 12px; font-weight: 600; transition: border-color 0.15s; }
+  .tutor-resource-link:hover { border-color: var(--pink); color: var(--pink); }
+
+  /* ─── PAGE HERO ─── */
+  .page-hero { background: var(--black); padding: clamp(1.75rem,5vw,2.5rem) var(--pad); }
+  .page-hero-inner { max-width: var(--wrap); margin: 0 auto; }
+  .page-hero-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--pink); margin-bottom: 7px; }
+  .page-hero h1 { font-size: clamp(1.8rem,5vw,2.5rem); font-weight: 700; color: var(--white); line-height: 1.1; letter-spacing: -0.02em; }
+  .page-hero p  { color: var(--gray-400); margin-top: 0.35rem; font-size: clamp(12px,2vw,14px); }
+
+  /* ─── LOADING STATE ─── */
+  .loading-row { display: flex; gap: 8px; margin-bottom: 1rem; }
+  .skeleton { background: var(--gray-200); border-radius: 6px; animation: pulse 1.5s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ─── FOOTER ─── */
+  footer { background: var(--black); color: var(--gray-400); font-size: 12px; padding: 1.25rem var(--pad); text-align: center; }
+  footer a { color: var(--pink-light); text-decoration: none; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    .home-hero-inner { grid-template-columns: 1fr; gap: 1.5rem; }
+    .home-2col       { grid-template-columns: 1fr; gap: 1.25rem; }
+    .ct-two-col      { grid-template-columns: 1fr; }
+    .grade-hero-inner { flex-direction: column; align-items: flex-start; }
+    .opp-details      { display: none; }
+    .fyt-banner       { flex-direction: column; align-items: flex-start; }
+  }
+  @media (max-width: 480px) {
+    .nav-logo { font-size: 12px; letter-spacing: 0.1em; }
+    .hero-grade-cards { gap: 6px; }
+    .hero-grade-card  { padding: 0.7rem 0.8rem; }
+    .schedule-body    { grid-template-columns: 1fr; }
+    .resource-grid    { grid-template-columns: 1fr; }
+    .ct-widget-inner  { gap: 0.4rem; }
+    .ct-note          { display: none; }
+    .grade-quick-links { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+  ⚙️  CONFIGURATION -- paste your Google Sheet
+       CSV URLs here after publishing the Sheet.
+       See the Notion setup guide for instructions.
+═══════════════════════════════════════════ -->
+<script>
+const SHEET_URLS = {
+  announcements: "",  // Announcements tab CSV URL
+  shoutouts:     "",  // Shoutouts tab CSV URL
+  updates:       "",  // Updates tab CSV URL
+  opportunities: "",  // Opportunities tab CSV URL
+  resources_8:   "",  // Resources_8 tab CSV URL
+  resources_910: "",  // Resources_910 tab CSV URL
+  resources_11:  "",  // Resources_11 tab CSV URL
+  resources_12:  "",  // Resources_12 tab CSV URL
+};
+
+// ─── Grade color map for shoutouts and opp tags ───
+const GRADE_COLORS = {
+  "8":    { primary: "var(--g8-primary)",   mid: "var(--g8-mid)",   dark: "var(--g8-dark)" },
+  "9":    { primary: "var(--g910-primary)", mid: "var(--g910-mid)", dark: "var(--g910-dark)" },
+  "10":   { primary: "var(--g910-primary)", mid: "var(--g910-mid)", dark: "var(--g910-dark)" },
+  "11":   { primary: "var(--g11-primary)",  mid: "var(--g11-mid)",  dark: "var(--g11-dark)" },
+  "12":   { primary: "var(--g12-primary)",  mid: "var(--g12-mid)",  dark: "var(--g12-dark)" },
+  "g8":   { primary: "var(--g8-primary)",   mid: "var(--g8-mid)",   dark: "var(--g8-dark)" },
+  "g910": { primary: "var(--g910-primary)", mid: "var(--g910-mid)", dark: "var(--g910-dark)" },
+  "g11":  { primary: "var(--g11-primary)",  mid: "var(--g11-mid)",  dark: "var(--g11-dark)" },
+  "g12":  { primary: "var(--g12-primary)",  mid: "var(--g12-mid)",  dark: "var(--g12-dark)" },
+  "pink": { primary: "var(--pink)",         mid: "var(--pink-faint)", dark: "var(--pink)" },
+};
+
+// ─── CSV PARSER ───────────────────────────────────
+function parseCSV(text) {
+  const rows = []; let row = []; let field = ""; let inQuote = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '"') { inQuote = !inQuote; }
+    else if (ch === ',' && !inQuote) { row.push(field.trim()); field = ""; }
+    else if ((ch === '\n' || ch === '\r') && !inQuote) {
+      if (field || row.length) { row.push(field.trim()); rows.push(row); }
+      row = []; field = "";
+      if (ch === '\r' && text[i+1] === '\n') i++;
+    } else { field += ch; }
+  }
+  if (field || row.length) { row.push(field.trim()); rows.push(row); }
+  if (rows.length < 2) return [];
+  const headers = rows[0].map(h => h.toLowerCase().replace(/\s+/g,''));
+  return rows.slice(1).map(r => {
+    const obj = {}; headers.forEach((h,i) => obj[h] = r[i] || ""); return obj;
+  }).filter(r => (r.active || "").toLowerCase() !== "no");
+}
+
+// ─── FETCH HELPER ─────────────────────────────────
+async function fetchCSV(url) {
+  if (!url) return null;
+  try {
+    const res = await fetch(url); if (!res.ok) return null;
+    return parseCSV(await res.text());
+  } catch { return null; }
+}
+
+// ─── DRIVE URL → DIRECT IMAGE URL ─────────────────
+function driveToImg(url) {
+  if (!url) return "";
+  const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w400` : url;
+}
+
+// ─── BUILD SHOUTOUT CARD ──────────────────────────
+function buildShoutout(s, gradeKey) {
+  const gc = GRADE_COLORS[s.grade] || GRADE_COLORS[gradeKey] || GRADE_COLORS["pink"];
+  const photoHTML = s.photourl
+    ? `<img src="${driveToImg(s.photourl)}" alt="${s.name}" loading="lazy">`
+    : (s.emoji || "🌟");
+  return `<div class="shoutout-card" style="--card-accent:${gc.primary}">
+    <div class="shoutout-photo" style="background:${gc.mid}">${photoHTML}</div>
+    <div class="shoutout-body">
+      <div class="shoutout-name">${s.name}</div>
+      <div class="shoutout-grade" style="color:${gc.dark}">${s.grade ? s.grade + (s.grade.length < 3 ? 'th Grade' : '') : ''}</div>
+      <div class="shoutout-quote">"${s.quote}"</div>
+    </div>
+  </div>`;
+}
+
+// ─── BUILD RESOURCE CARD ──────────────────────────
+function buildResource(r, bgColor) {
+  return `<a href="${r.link || '#'}" target="_blank" class="resource-card" ${bgColor ? `style="background:${bgColor}"` : ''}>
+    <div class="rc-tag">${r.tag}</div>
+    <div class="rc-title">${r.title}</div>
+    <div class="rc-desc">${r.desc}</div>
+    <div class="rc-arrow">→</div>
+  </a>`;
+}
+
+// ─── BUILD OPP ITEM ───────────────────────────────
+function buildOpp(o) {
+  const gc = GRADE_COLORS[o.tagcolor] || GRADE_COLORS["pink"];
+  const urgentClass = o.urgent?.toLowerCase() === "yes" ? " urgent" : "";
+  return `<a href="${o.link || '#'}" target="_blank" class="opp-item">
+    <div>
+      <div class="opp-title">${o.title}</div>
+      <div class="opp-org">${o.org}</div>
+      <div class="opp-details">${o.details}</div>
+    </div>
+    <div class="opp-meta">
+      <span class="opp-tag" style="color:${gc.primary};border-color:${gc.primary}">${o.tag}</span>
+      <span class="opp-deadline${urgentClass}">${o.deadline}</span>
+    </div>
+  </a>`;
+}
+
+// ─── INJECT CONTENT FROM SHEETS ───────────────────
+async function loadSheetContent() {
+  const [announcements, shoutouts, updates, opps, r8, r910, r11, r12] = await Promise.all([
+    fetchCSV(SHEET_URLS.announcements),
+    fetchCSV(SHEET_URLS.shoutouts),
+    fetchCSV(SHEET_URLS.updates),
+    fetchCSV(SHEET_URLS.opportunities),
+    fetchCSV(SHEET_URLS.resources_8),
+    fetchCSV(SHEET_URLS.resources_910),
+    fetchCSV(SHEET_URLS.resources_11),
+    fetchCSV(SHEET_URLS.resources_12),
+  ]);
+
+  // Announcements marquee
+  if (announcements?.length) {
+    const doubled = [...announcements, ...announcements];
+    const html = doubled.map(a => `<span class="announce-item">${a.text}</span>`).join('');
+    document.querySelectorAll('.announce-inner').forEach(el => el.innerHTML = html);
+  }
+
+  // Program updates (home page)
+  if (updates?.length) {
+    const el = document.getElementById('updates-list');
+    if (el) el.innerHTML = updates.map(u => `
+      <div class="update-item">
+        <div class="update-date">${u.date}</div>
+        <div class="update-title">${u.title}</div>
+        <div class="update-body">${u.body}</div>
+      </div>`).join('');
+  }
+
+  // Shoutouts by grade
+  const gradeMap = { "home": null, "g8": "8", "g910": ["9","10"], "g11": "11", "g12": "12" };
+  if (shoutouts?.length) {
+    Object.entries(gradeMap).forEach(([pageId, gradeFilter]) => {
+      const els = document.querySelectorAll(`#page-${pageId} .shoutout-strip`);
+      els.forEach(strip => {
+        const filtered = gradeFilter === null
+          ? shoutouts
+          : shoutouts.filter(s => Array.isArray(gradeFilter)
+              ? gradeFilter.includes(s.grade)
+              : s.grade === gradeFilter);
+        if (filtered.length) strip.innerHTML = filtered.map(s => buildShoutout(s, pageId)).join('');
+      });
+    });
+  }
+
+  // Resources by grade
+  const resourceSets = [
+    { data: r8,   selector: '#page-g8 .resource-grid',   bg: 'var(--g8-mid)' },
+    { data: r910, selector: '#page-g910 .resource-grid',  bg: 'var(--g910-mid)' },
+    { data: r11,  selector: '#page-g11 .resource-grid',   bg: 'var(--g11-mid)' },
+    { data: r12,  selector: '#page-g12 .resource-grid',   bg: 'var(--g12-mid)' },
+  ];
+  resourceSets.forEach(({data, selector, bg}) => {
+    if (!data?.length) return;
+    const el = document.querySelector(selector);
+    if (el) el.innerHTML = data.map((r, i) => buildResource(r, i === 0 ? bg : null)).join('');
+  });
+
+  // Opportunities by category
+  if (opps?.length) {
+    const cats = { leadership: [], service: [], jobs: [] };
+    opps.forEach(o => {
+      const cat = (o.category || "").toLowerCase();
+      if (cat.includes("service")) cats.service.push(o);
+      else if (cat.includes("job") || cat.includes("scholar")) cats.jobs.push(o);
+      else cats.leadership.push(o);
+    });
+    const oppContainer = document.getElementById('opp-dynamic');
+    if (oppContainer) {
+      let html = '';
+      if (cats.leadership.length) html += `<div class="opp-section-title">Leadership &amp; Programs</div>` + cats.leadership.map(buildOpp).join('');
+      if (cats.service.length)    html += `<div class="opp-section-title">Service Opportunities</div>`       + cats.service.map(buildOpp).join('');
+      if (cats.jobs.length)       html += `<div class="opp-section-title">Jobs &amp; Scholarships</div>`    + cats.jobs.map(buildOpp).join('');
+      oppContainer.innerHTML = html || oppContainer.innerHTML;
+    }
+  }
+}
+</script>
+
+<!-- ─── NAV ─── -->
+<nav>
+  <a href="#" class="nav-logo" onclick="showPage('home');return false;">BRYCdown</a>
+  <div class="nav-scroll">
+    <ul class="nav-links">
+      <li><a href="#" id="nav-home" class="active" onclick="showPage('home');return false;">Home</a></li>
+      <li><a href="#" id="nav-g8"   class="g8"     onclick="showPage('g8');return false;">8th</a></li>
+      <li><a href="#" id="nav-g910" class="g910"   onclick="showPage('g910');return false;">9th &amp; 10th</a></li>
+      <li><a href="#" id="nav-g11"  class="g11"    onclick="showPage('g11');return false;">11th</a></li>
+      <li><a href="#" id="nav-g12"  class="g12"    onclick="showPage('g12');return false;">12th</a></li>
+      <li><a href="#" id="nav-opp"  onclick="showPage('opp');return false;">Opportunities</a></li>
+      <li><a href="#" id="nav-ct"   onclick="showPage('ct');return false;">Counseling &amp; Tutoring</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ─── CT WIDGET TEMPLATE ─── -->
+<template id="ct-widget-tpl">
+  <div class="ct-widget">
+    <div class="ct-widget-inner">
+      <span class="ct-widget-label">Need support? <span>We've got you.</span></span>
+      <a href="http://thebryc.setmore.com/" target="_blank" class="ct-btn ct-btn-primary">Schedule Counseling</a>
+      <a href="http://thebryc.setmore.com/" target="_blank" class="ct-btn ct-btn-outline">Schedule Tutoring</a>
+      <span class="ct-note">12-hr advance notice required &bull; <a onclick="showPage('ct');return false;">Full details</a></span>
+    </div>
+  </div>
+</template>
+
+<!-- ══════════ HOME ══════════ -->
+<div id="page-home" class="page active">
+  <div class="announce-band">
+    <div class="announce-inner">
+      <span class="announce-item">EOY Block Party coming soon</span>
+      <span class="announce-item">ACT Testing Window open now</span>
+      <span class="announce-item">BRYC Legal Fellows deadline May 31</span>
+      <span class="announce-item">Hustle &amp; Grow Summer deadline May 25</span>
+      <span class="announce-item">Returning Families Onboarding Form is live</span>
+      <span class="announce-item">EOY Block Party coming soon</span>
+      <span class="announce-item">ACT Testing Window open now</span>
+      <span class="announce-item">BRYC Legal Fellows deadline May 31</span>
+      <span class="announce-item">Hustle &amp; Grow Summer deadline May 25</span>
+      <span class="announce-item">Returning Families Onboarding Form is live</span>
+    </div>
+  </div>
+  <div class="home-hero">
+    <div class="home-hero-inner">
+      <div>
+        <h1>Your hub.<br><span>Your program.</span><br>Right here.</h1>
+        <p>Everything you need for BRYC -- schedules, resources, opportunities, and shoutouts. Pick your grade to get started.</p>
+      </div>
+      <div class="hero-grade-cards">
+        <a href="#" class="hero-grade-card hgc-8"   onclick="showPage('g8');return false;"><div class="gl">8th Grade</div><div class="gn">YPAR Fellows</div></a>
+        <a href="#" class="hero-grade-card hgc-910" onclick="showPage('g910');return false;"><div class="gl">9th &amp; 10th</div><div class="gn">SRL Fellows</div></a>
+        <a href="#" class="hero-grade-card hgc-11"  onclick="showPage('g11');return false;"><div class="gl">11th Grade</div><div class="gn">ACT Prep</div></a>
+        <a href="#" class="hero-grade-card hgc-12"  onclick="showPage('g12');return false;"><div class="gl">12th Grade</div><div class="gn">Seniors 2026</div></a>
+      </div>
+    </div>
+  </div>
+  <div class="ct-widget-slot"></div>
+  <div class="content-wrap">
+    <div class="home-2col">
+      <div>
+        <div class="section-header"><h2>Program Updates</h2></div>
+        <div id="updates-list">
+          <div class="update-item"><div class="update-date">Jun 2026</div><div class="update-title">EOY Block Party details dropping soon</div><div class="update-body">Stay tuned -- your PMs will share location and time this week.</div></div>
+          <div class="update-item"><div class="update-date">May 2026</div><div class="update-title">Returning Families Onboarding Form is live</div><div class="update-body">Guardians -- complete the form to confirm your Fellow's spot for next year.</div></div>
+          <div class="update-item"><div class="update-date">May 2026</div><div class="update-title">BRYC Legal Fellows applications open</div><div class="update-body">A BRYC-exclusive summer program exploring the criminal justice system. Deadline May 31.</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-header"><h2>Quick Links</h2></div>
+        <div class="sidebar-links">
+          <a href="https://thebryc.github.io/bryc-schedule/" target="_blank" class="sidebar-link"><span class="sidebar-link-icon">📅</span> Fellow Schedule</a>
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLSfpWcM3kC-uYvYVx7Zr7HyhDlPseBsZLOKBop3vXj8dAOYd6w/viewform" target="_blank" class="sidebar-link"><span class="sidebar-link-icon">📝</span> Returning Families Form</a>
+          <a href="http://thebryc.setmore.com/" target="_blank" class="sidebar-link"><span class="sidebar-link-icon">🧠</span> Counseling Appointment</a>
+          <a href="http://thebryc.setmore.com/" target="_blank" class="sidebar-link"><span class="sidebar-link-icon">📚</span> Tutoring Appointment</a>
+          <a href="#" onclick="showPage('opp');return false;" class="sidebar-link"><span class="sidebar-link-icon">🌟</span> Opportunities Board</a>
+          <a href="https://instagram.com/the_bryc" target="_blank" class="sidebar-link"><span class="sidebar-link-icon">📸</span> @the_bryc</a>
+        </div>
+      </div>
+    </div>
+    <div class="section-header"><h2>Shoutouts</h2></div>
+    <div class="shoutout-strip">
+      <div class="shoutout-card" style="--card-accent:var(--pink)"><div class="shoutout-photo" style="background:var(--pink-faint)">🌟</div><div class="shoutout-body"><div class="shoutout-name">Aaliyah M.</div><div class="shoutout-grade" style="color:var(--pink)">12th Grade</div><div class="shoutout-quote">"Got into my dream school. BRYC made it real."</div></div></div>
+      <div class="shoutout-card" style="--card-accent:var(--g11-primary)"><div class="shoutout-photo" style="background:var(--g11-mid)">📈</div><div class="shoutout-body"><div class="shoutout-name">Marcus T.</div><div class="shoutout-grade" style="color:var(--g11-dark)">11th Grade</div><div class="shoutout-quote">"Improved my ACT score by 4 points this month."</div></div></div>
+      <div class="shoutout-card" style="--card-accent:var(--g910-primary)"><div class="shoutout-photo" style="background:var(--g910-mid)">🎯</div><div class="shoutout-body"><div class="shoutout-name">Destiny R.</div><div class="shoutout-grade" style="color:var(--g910-dark)">9th Grade</div><div class="shoutout-quote">"Never missed a session this semester."</div></div></div>
+      <div class="shoutout-card" style="--card-accent:var(--g8-primary)"><div class="shoutout-photo" style="background:var(--g8-mid)">🔬</div><div class="shoutout-body"><div class="shoutout-name">Jordan B.</div><div class="shoutout-grade" style="color:var(--g8-dark)">8th Grade</div><div class="shoutout-quote">"YPAR research accepted for presentation."</div></div></div>
+      <div class="shoutout-card" style="--card-accent:var(--g12-primary)"><div class="shoutout-photo" style="background:var(--g12-mid)">💰</div><div class="shoutout-body"><div class="shoutout-name">Imani K.</div><div class="shoutout-grade" style="color:var(--g12-dark)">12th Grade</div><div class="shoutout-quote">"$24,000 in scholarships so far. Not done yet."</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 8TH GRADE ══════════ -->
+<div id="page-g8" class="page">
+  <div class="grade-hero" style="background:var(--g8-primary)">
+    <div class="grade-hero-inner">
+      <div><div class="grade-badge" style="background:var(--black);color:var(--g8-primary)">8th Grade</div><h1>YPAR Fellows</h1><p style="color:var(--g8-dark)">Youth Participatory Action Research -- your questions, your community, your research.</p></div>
+      <div class="grade-quick-links">
+        <a href="#" class="quick-link" style="background:var(--black);color:var(--g8-primary);border-color:var(--black)">YPAR Workspace →</a>
+        <a href="#" class="quick-link" style="color:var(--black)">Schedule</a>
+      </div>
+    </div>
+  </div>
+  <div class="ct-widget-slot"></div>
+  <div class="content-wrap">
+    <div class="schedule-embed">
+      <div class="schedule-header" style="background:var(--g8-primary);color:var(--black)">Session Schedule</div>
+      <div class="schedule-body">
+        <div class="schedule-day"><div class="schedule-day-name">Monday</div><div class="schedule-day-time">4:00 – 5:30 PM</div><div class="schedule-day-loc">BRYC Main Space</div></div>
+        <div class="schedule-day"><div class="schedule-day-name">Wednesday</div><div class="schedule-day-time">4:00 – 5:30 PM</div><div class="schedule-day-loc">BRYC Main Space</div></div>
+        <div class="schedule-day"><div class="schedule-day-name">Service Learning</div><div class="schedule-day-time">Varies</div><div class="schedule-day-loc">Community Site</div></div>
+      </div>
+    </div>
+    <div class="section-header"><h2>Your Resources</h2></div>
+    <div class="resource-grid">
+      <a href="#" class="resource-card" style="background:var(--g8-mid)"><div class="rc-tag">Research</div><div class="rc-title">YPAR Research Hub</div><div class="rc-desc">Research materials and data collection tools.</div><div class="rc-arrow">→</div></a>
+      <a href="#" class="resource-card"><div class="rc-tag">Curriculum</div><div class="rc-title">SRL Intro Materials</div><div class="rc-desc">Start building your self-regulated learning toolkit.</div><div class="rc-arrow">→</div></a>
+      <a href="https://thebryc.org/fyt" target="_blank" class="resource-card"><div class="rc-tag">Activities</div><div class="rc-title">Find Your Thing (FYT)</div><div class="rc-desc">Explore extracurriculars that fit who you are.</div><div class="rc-arrow">→</div></a>
+    </div>
+    <div class="section-header"><h2>Shoutouts</h2></div>
+    <div class="shoutout-strip">
+      <div class="shoutout-card" style="--card-accent:var(--g8-primary)"><div class="shoutout-photo" style="background:var(--g8-mid)">🔬</div><div class="shoutout-body"><div class="shoutout-name">Jordan B.</div><div class="shoutout-grade" style="color:var(--g8-dark)">8th Grade</div><div class="shoutout-quote">"YPAR research accepted for presentation."</div></div></div>
+      <div class="shoutout-card" style="--card-accent:var(--g8-primary)"><div class="shoutout-photo" style="background:var(--g8-mid)">📚</div><div class="shoutout-body"><div class="shoutout-name">Camille W.</div><div class="shoutout-grade" style="color:var(--g8-dark)">8th Grade</div><div class="shoutout-quote">"Perfect attendance all semester. Period."</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 9TH/10TH ══════════ -->
+<div id="page-g910" class="page">
+  <div class="grade-hero" style="background:var(--g910-primary)">
+    <div class="grade-hero-inner">
+      <div><div class="grade-badge" style="background:var(--black);color:var(--g910-primary)">9th &amp; 10th Grade</div><h1>SRL Fellows</h1><p style="color:var(--g910-dark)">Self-Regulated Learning -- build the habits that carry you through college and beyond.</p></div>
+      <div class="grade-quick-links">
+        <a href="#" class="quick-link" style="background:var(--black);color:var(--g910-primary);border-color:var(--black)">SRL Roadmap →</a>
+        <a href="https://thebryc.org/fyt" target="_blank" class="quick-link" style="color:var(--black)">Find Your Thing</a>
+      </div>
+    </div>
+  </div>
+  <div class="ct-widget-slot"></div>
+  <div class="content-wrap">
+    <div class="schedule-embed">
+      <div class="schedule-header" style="background:var(--g910-primary);color:var(--black)">Session Schedule</div>
+      <div class="schedule-body">
+        <div class="schedule-day"><div class="schedule-day-name">Tuesday</div><div class="schedule-day-time">4:00 – 6:00 PM</div><div class="schedule-day-loc">BRYC Main Space</div></div>
+        <div class="schedule-day"><div class="schedule-day-name">Thursday</div><div class="schedule-day-time">4:00 – 6:00 PM</div><div class="schedule-day-loc">BRYC Main Space</div></div>
+        <div class="schedule-day"><div class="schedule-day-name">FYT</div><div class="schedule-day-time">Varies</div><div class="schedule-day-loc">Activity Dependent</div></div>
+      </div>
+    </div>
+    <div class="section-header"><h2>Your Resources</h2></div>
+    <div class="resource-grid">
+      <a href="#" class="resource-card" style="background:var(--g910-mid)"><div class="rc-tag">Learning</div><div class="rc-title">SRL Roadmap</div><div class="rc-desc">Track your goals, habits, and growth all semester.</div><div class="rc-arrow">→</div></a>
+      <a href="https://thebryc.org/fyt" target="_blank" class="resource-card"><div class="rc-tag">Activities</div><div class="rc-title">Find Your Thing (FYT)</div><div class="rc-desc">Match with extracurriculars that fit who you are.</div><div class="rc-arrow">→</div></a>
+      <a href="#" class="resource-card"><div class="rc-tag">ACT Prep</div><div class="rc-title">Intro to ACT Strategy</div><div class="rc-desc">Get a head start before junior year.</div><div class="rc-arrow">→</div></a>
+    </div>
+    <div class="section-header"><h2>Shoutouts</h2></div>
+    <div class="shoutout-strip">
+      <div class="shoutout-card" style="--card-accent:var(--g910-primary)"><div class="shoutout-photo" style="background:var(--g910-mid)">🎯</div><div class="shoutout-body"><div class="shoutout-name">Destiny R.</div><div class="shoutout-grade" style="color:var(--g910-dark)">9th Grade</div><div class="shoutout-quote">"Never missed a session this semester."</div></div></div>
+      <div class="shoutout-card" style="--card-accent:var(--g910-primary)"><div class="shoutout-photo" style="background:var(--g910-mid)">📖</div><div class="shoutout-body"><div class="shoutout-name">Tre L.</div><div class="shoutout-grade" style="color:var(--g910-dark)">10th Grade</div><div class="shoutout-quote">"Completed every SRL check-in on time."</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 11TH ══════════ -->
+<div id="page-g11" class="page">
+  <div class="grade-hero" style="background:var(--g11-primary)">
+    <div class="grade-hero-inner">
+      <div><div class="grade-badge" style="background:var(--black);color:var(--g11-primary)">11th Grade</div><h1 style="color:var(--white)">ACT Prep</h1><p style="color:rgba(255,255,255,0.75)">Score goals, test strategy, and the tools to get there. This is your year.</p></div>
+      <div class="grade-quick-links">
+        <a href="#" class="quick-link" style="background:var(--white);color:var(--g11-primary);border-color:var(--white)">Study Hall →</a>
+        <a href="https://uworld.com" target="_blank" class="quick-link" style="color:var(--white);border-color:rgba(255,255,255,0.45)">UWorld</a>
+        <a href="http://thea.study" target="_blank" class="quick-link" style="color:var(--white);border-color:rgba(255,255,255,0.45)">Thea</a>
+      </div>
+    </div>
+  </div>
+  <div class="ct-widget-slot"></div>
+  <div class="content-wrap">
+    <div class="schedule-embed">
+      <div class="schedule-header" style="background:var(--g11-primary);color:var(--white)">Session Schedule</div>
+      <div class="schedule-body">
+        <div class="schedule-day"><div class="schedule-day-name">Monday</div><div class="schedule-day-time">4:00 – 6:30 PM</div><div class="schedule-day-loc">ACT Prep Room</div></div>
+        <div class="schedule-day"><div class="schedule-day-name">Wednesday</div><div class="schedule-day-time">4:00 – 6:30 PM</div><div class="schedule-day-loc">ACT Prep Room</div></div>
+        <div class="schedule-day"><div class="schedule-day-name">Study Hall</div><div class="schedule-day-time">Flexible</div><div class="schedule-day-loc">MasteryPrep Online</div></div>
+      </div>
+    </div>
+    <div class="section-header"><h2>ACT Tools</h2></div>
+    <div class="resource-grid">
+      <a href="#" class="resource-card" style="background:var(--g11-mid)"><div class="rc-tag">Practice</div><div class="rc-title">MasteryPrep Study Hall</div><div class="rc-desc">Full-length practice tests, drills, and score tracking.</div><div class="rc-arrow">→</div></a>
+      <a href="https://uworld.com" target="_blank" class="resource-card"><div class="rc-tag">Strategy</div><div class="rc-title">UWorld ACT</div><div class="rc-desc">Question-level strategy for every section.</div><div class="rc-arrow">→</div></a>
+      <a href="http://thea.study" target="_blank" class="resource-card"><div class="rc-tag">AI Tutor</div><div class="rc-title">Thea Study Tool</div><div class="rc-desc">AI-powered study support built for BRYC Fellows.</div><div class="rc-arrow">→</div></a>
+      <a href="#" class="resource-card"><div class="rc-tag">College Prep</div><div class="rc-title">College Tour Recap</div><div class="rc-desc">Houston trip reflections, photos, and next steps.</div><div class="rc-arrow">→</div></a>
+    </div>
+    <div class="section-header"><h2>Shoutouts</h2></div>
+    <div class="shoutout-strip">
+      <div class="shoutout-card" style="--card-accent:var(--g11-primary)"><div class="shoutout-photo" style="background:var(--g11-mid)">📈</div><div class="shoutout-body"><div class="shoutout-name">Marcus T.</div><div class="shoutout-grade" style="color:var(--g11-dark)">11th Grade</div><div class="shoutout-quote">"Improved my ACT score by 4 points."</div></div></div>
+      <div class="shoutout-card" style="--card-accent:var(--g11-primary)"><div class="shoutout-photo" style="background:var(--g11-mid)">🔥</div><div class="shoutout-body"><div class="shoutout-name">Naomi P.</div><div class="shoutout-grade" style="color:var(--g11-dark)">11th Grade</div><div class="shoutout-quote">"Hit her target score on the first real test."</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 12TH ══════════ -->
+<div id="page-g12" class="page">
+  <div class="grade-hero" style="background:var(--g12-primary)">
+    <div class="grade-hero-inner">
+      <div><div class="grade-badge" style="background:var(--g12-mid);color:var(--g12-dark)">12th Grade</div><h1 style="color:var(--white)">Seniors 2026</h1><p style="color:rgba(255,255,255,0.75)">Applications, financial aid, advising, and everything you need to land strong.</p></div>
+      <div class="grade-quick-links">
+        <a href="#" class="quick-link" style="background:var(--white);color:var(--g12-primary);border-color:var(--white)">Senior Resources →</a>
+        <a href="#" class="quick-link" style="color:var(--white);border-color:rgba(255,255,255,0.45)">Advising</a>
+        <a href="#" class="quick-link" style="color:var(--white);border-color:rgba(255,255,255,0.45)">Financial Aid</a>
+      </div>
+    </div>
+  </div>
+  <div class="ct-widget-slot"></div>
+  <div class="content-wrap">
+    <div class="schedule-embed">
+      <div class="schedule-header" style="background:var(--g12-primary);color:var(--white)">Session Schedule</div>
+      <div class="schedule-body">
+        <div class="schedule-day"><div class="schedule-day-name">Tuesday</div><div class="schedule-day-time">4:00 – 6:00 PM</div><div class="schedule-day-loc">Senior Space</div></div>
+        <div class="schedule-day"><div class="schedule-day-name">Advising</div><div class="schedule-day-time">By appointment</div><div class="schedule-day-loc">Office / Virtual</div></div>
+        <div class="schedule-day"><div class="schedule-day-name">College Passport</div><div class="schedule-day-time">Varies</div><div class="schedule-day-loc">Campus visits</div></div>
+      </div>
+    </div>
+    <div class="section-header"><h2>Senior Resources</h2></div>
+    <div class="resource-grid">
+      <a href="#" class="resource-card" style="background:var(--g12-mid)"><div class="rc-tag">Applications</div><div class="rc-title">Senior Resource Hub</div><div class="rc-desc">Essays, deadlines, college lists, and everything in between.</div><div class="rc-arrow">→</div></a>
+      <a href="#" class="resource-card"><div class="rc-tag">Money</div><div class="rc-title">Financial Aid Guide</div><div class="rc-desc">FAFSA, scholarships, and how to read award letters.</div><div class="rc-arrow">→</div></a>
+      <a href="#" class="resource-card"><div class="rc-tag">Advising</div><div class="rc-title">1:1 Advising Sign-Up</div><div class="rc-desc">Book time with your PM for decisions and next steps.</div><div class="rc-arrow">→</div></a>
+      <a href="#" class="resource-card"><div class="rc-tag">Campus Visits</div><div class="rc-title">College Passport Program</div><div class="rc-desc">Track your campus visits and reflections.</div><div class="rc-arrow">→</div></a>
+    </div>
+    <div class="section-header"><h2>Shoutouts</h2></div>
+    <div class="shoutout-strip">
+      <div class="shoutout-card" style="--card-accent:var(--g12-primary)"><div class="shoutout-photo" style="background:var(--g12-mid)">🎓</div><div class="shoutout-body"><div class="shoutout-name">Aaliyah M.</div><div class="shoutout-grade" style="color:var(--g12-dark)">12th Grade</div><div class="shoutout-quote">"Got into my dream school. BRYC made it real."</div></div></div>
+      <div class="shoutout-card" style="--card-accent:var(--g12-primary)"><div class="shoutout-photo" style="background:var(--g12-mid)">💰</div><div class="shoutout-body"><div class="shoutout-name">Imani K.</div><div class="shoutout-grade" style="color:var(--g12-dark)">12th Grade</div><div class="shoutout-quote">"$24,000 in scholarships so far."</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ OPPORTUNITIES ══════════ -->
+<div id="page-opp" class="page">
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="page-hero-eyebrow">Updated regularly</div>
+      <h1>Opportunities Board</h1>
+      <p>Internships, programs, scholarships, and service -- curated for BRYC Fellows.</p>
+    </div>
+  </div>
+  <div class="ct-widget-slot"></div>
+  <div class="content-wrap">
+    <div class="fyt-banner">
+      <div><h3>Find Your Thing (FYT)</h3><p>BRYC's extracurricular matching program. Not sure where to start? Use the AI search tool.</p></div>
+      <div class="fyt-btns">
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSc_PR8OdZyOIr_d7ZFIhzaKmZ5QQW7Y6h_mzWi01-DdeTQbSg/viewform" target="_blank" class="fyt-btn fyt-btn-pink">FYT Spring Intake</a>
+        <a href="https://www.playlab.ai/project/cly32p5ab04hpuvh7mhz7pyn8" target="_blank" class="fyt-btn fyt-btn-outline">AI Search Tool</a>
+        <a href="https://docs.google.com/document/d/e/2PACX-1vSpF4XmxjNt_Ed-Mp9l4WM-8-DOnPeaN__3Ew9Px9PcNgo3KcfiM6xa2CXx7S4rn3tVTmVb9BW38XqW/pub" target="_blank" class="fyt-btn fyt-btn-outline">What is FYT?</a>
+      </div>
+    </div>
+    <!-- Dynamic opportunities load here; fallback content shown if Sheet not connected -->
+    <div id="opp-dynamic">
+      <div class="opp-section-title">Leadership &amp; Programs</div>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLScG76mqFiLwEdmsrPhbGdb7Yfmgmd7iT4J4tBJ-UWNn2m4x8Q/viewform" target="_blank" class="opp-item"><div><div class="opp-title">BRYC Legal Fellows</div><div class="opp-org">BRYC Exclusive &bull; DA's Office &amp; 19th Judicial District Court</div><div class="opp-details">Leadership and public speaking via the criminal justice system. Saturday sessions June 13, 20, 27 &amp; July 11.</div></div><div class="opp-meta"><span class="opp-tag" style="color:var(--pink);border-color:var(--pink)">BRYC Only</span><span class="opp-deadline urgent">May 31</span></div></a>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSeAd5W4M0YHDX9S43XPwxLP3vZ7TKfd9Z2SCkpAIhJGvsovfA/viewform" target="_blank" class="opp-item"><div><div class="opp-title">Hustle &amp; Grow Summer</div><div class="opp-org">Baton Roots Community Farm at BREC's Howell Park</div><div class="opp-details">Urban farming and community leadership. June 9 – July 16, Tues &amp; Thurs 9 AM – 12 PM. $500 stipend. Ages 14-18.</div></div><div class="opp-meta"><span class="opp-tag" style="color:var(--g11-primary);border-color:var(--g11-primary)">Summer</span><span class="opp-deadline urgent">May 25</span></div></a>
+      <a href="https://batonrougestem.org/brstem-fellow/" target="_blank" class="opp-item"><div><div class="opp-title">BRSTEM Fellows Program</div><div class="opp-org">BRSTEM</div><div class="opp-details">Leadership, career readiness, and hands-on STEM. M-Th 8 AM – 12 PM. $450 stipend.</div></div><div class="opp-meta"><span class="opp-tag" style="color:var(--g910-dark);border-color:var(--g910-dark)">Fellowship</span><span class="opp-deadline urgent">Apply ASAP</span></div></a>
+      <a href="https://sites.google.com/ebrschools.org/wfdsupportsite/internships-work-based-learning" target="_blank" class="opp-item"><div><div class="opp-title">EBR Learn &amp; Earn Internship</div><div class="opp-org">EBR School System &bull; Current 11th graders</div><div class="opp-details">Paid internship. June 1 – July 10, M-Th 8 AM – 4:30 PM. Up to $1,500. Mandatory Boot Camp June 1-4.</div></div><div class="opp-meta"><span class="opp-tag" style="color:var(--g11-primary);border-color:var(--g11-primary)">Paid Internship</span><span class="opp-deadline urgent">Apply ASAP</span></div></a>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSc-jAK40oCO1igES89lTmaU-scURJeezGQpA4kt3DueU4OlOA/viewform" target="_blank" class="opp-item"><div><div class="opp-title">UREC Technology Institute</div><div class="opp-org">UREC Academy &bull; June 1 – July 15</div><div class="opp-details">Free summer tech + ACT prep. M-F sessions. Orientation May 27.</div></div><div class="opp-meta"><span class="opp-tag" style="color:var(--g910-dark);border-color:var(--g910-dark)">Free / ACT Prep</span><span class="opp-deadline urgent">Apply ASAP</span></div></a>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSek-gYUXWi-X-qDcarEimX698eQI6n71qfkGbkXvBzne0Qr-Q/viewform" target="_blank" class="opp-item"><div><div class="opp-title">UREC Entrepreneurship Institute</div><div class="opp-org">UREC Academy &bull; Southern University College of Business</div><div class="opp-details">Free entrepreneurship + ACT prep. June 1 – July 15. Orientation May 27.</div></div><div class="opp-meta"><span class="opp-tag" style="color:var(--g910-dark);border-color:var(--g910-dark)">Free / Business</span><span class="opp-deadline urgent">Apply ASAP</span></div></a>
+      <a href="https://www.lsu.edu/caincenter/programs/summer-academy/index.php" target="_blank" class="opp-item"><div><div class="opp-title">LSU Cain Center Summer Academy</div><div class="opp-org">LSU E. J. Ourso College of Business &bull; Rising 10th-12th</div><div class="opp-details">Entrepreneurship and leadership. One week. $1,250, financial aid available.</div></div><div class="opp-meta"><span class="opp-tag" style="color:var(--g12-primary);border-color:var(--g12-primary)">Business</span><span class="opp-deadline">Open Until Full</span></div></a>
+      <div class="opp-section-title">Service Opportunities</div>
+      <a href="https://volunteer.brfoodbank.org/search" target="_blank" class="opp-item"><div><div class="opp-title">Greater Baton Rouge Food Bank</div><div class="opp-org">Ages 14+ (10 with guardian) &bull; Flexible hours</div></div><div class="opp-meta"><span class="opp-tag" style="color:var(--g12-primary);border-color:var(--g12-primary)">Service</span><span class="opp-deadline">Flexible</span></div></a>
+      <a href="#" class="opp-item"><div><div class="opp-title">St. James Place Senior Living</div><div class="opp-org">225-215-4568 &bull; ebozeman@stjamesplace.org &bull; 7 days/week</div></div><div class="opp-meta"><span class="opp-tag" style="color:var(--g12-primary);border-color:var(--g12-primary)">Service</span><span class="opp-deadline">Flexible</span></div></a>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSdTTd_76QYB_VVn8Z4zEAqSG2RAuCxA8QKcnSyhAoqD6NMpig/viewform" target="_blank" class="opp-item"><div><div class="opp-title">EBR Parish Library -- Virtual Volunteering</div><div class="opp-org">Grades 6-12 &bull; Each recommendation form = 30 min credit</div></div><div class="opp-meta"><span class="opp-tag" style="color:var(--g12-primary);border-color:var(--g12-primary)">Virtual</span><span class="opp-deadline">Ongoing</span></div></a>
+      <a href="https://habitatbrla.org/volunteer/" target="_blank" class="opp-item"><div><div class="opp-title">Habitat for Humanity</div><div class="opp-org">Ages 16+ &bull; Construction Wed/Sat or ReStore</div></div><div class="opp-meta"><span class="opp-tag" style="color:var(--g12-primary);border-color:var(--g12-primary)">Service</span><span class="opp-deadline">Ongoing</span></div></a>
+      <a href="https://www.volgistics.com/appform/118030395" target="_blank" class="opp-item"><div><div class="opp-title">Baton Rouge General Hospital</div><div class="opp-org">Ages 15+, 2.5 GPA &bull; Min. 25 hours</div></div><div class="opp-meta"><span class="opp-tag" style="color:var(--g12-primary);border-color:var(--g12-primary)">Healthcare</span><span class="opp-deadline">Ongoing</span></div></a>
+      <div class="opp-section-title">Jobs &amp; Scholarships</div>
+      <div class="resource-grid">
+        <a href="https://www.indeed.com/q-teen-l-baton-rouge%2C-la-jobs.html" target="_blank" class="resource-card"><div class="rc-tag">Jobs</div><div class="rc-title">Indeed Teen Jobs</div><div class="rc-desc">Part-time listings for teens in Baton Rouge.</div><div class="rc-arrow">→</div></a>
+        <a href="https://www.ziprecruiter.com/Jobs/Part-Time-16-Years-Old/-in-Baton-Rouge,LA" target="_blank" class="resource-card"><div class="rc-tag">Jobs</div><div class="rc-title">ZipRecruiter</div><div class="rc-desc">Part-time listings for 16+ in Baton Rouge.</div><div class="rc-arrow">→</div></a>
+        <a href="https://www.snagajob.com/search/w-baton+rouge,+la/q-minimum+age+16+years+old" target="_blank" class="resource-card"><div class="rc-tag">Jobs</div><div class="rc-title">Snag-a-Job</div><div class="rc-desc">Hourly job listings for Baton Rouge teens.</div><div class="rc-arrow">→</div></a>
+        <a href="https://www.scholarships.com/financial-aid/college-scholarships/scholarship-directory/school-year/high-school-senior" target="_blank" class="resource-card"><div class="rc-tag">Scholarships</div><div class="rc-title">Scholarships by Grade</div><div class="rc-desc">Curated for 9th, 10th, 11th, and 12th graders.</div><div class="rc-arrow">→</div></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ COUNSELING & TUTORING ══════════ -->
+<div id="page-ct" class="page">
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="page-hero-eyebrow">Confidential &bull; Free for all Fellows</div>
+      <h1>Counseling &amp; Tutoring</h1>
+      <p>Mental health support and academic tutoring -- both available to every BRYC Fellow.</p>
+    </div>
+  </div>
+  <div class="ct-widget-slot"></div>
+  <div class="content-wrap">
+    <div class="ct-two-col">
+      <div class="ct-card">
+        <div class="ct-card-header"><h3>🧠 Mental Health Counseling</h3></div>
+        <div class="ct-card-body">
+          <p>Meet <strong>Dr. Christi Brown</strong>, BRYC's licensed and confidential mental health counselor. All sessions are private.</p>
+          <ul>
+            <li>Monday – Wednesday: <strong>in-person at BRYC</strong></li>
+            <li>Thursday &amp; Friday: <strong>virtual</strong></li>
+            <li>Video sessions available upon request after booking</li>
+            <li>Must book at least <strong>12 hours in advance</strong></li>
+          </ul>
+          <a href="http://thebryc.setmore.com/" target="_blank" class="ct-cta">Make an Appointment with Dr. Christi →</a>
+          <div class="ct-policy"><strong>Absence Policy:</strong> Notify Dr. Christi as early as possible at <a href="mailto:christi@thebryc.org">christi@thebryc.org</a></div>
+          <div style="margin-top:1rem">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-400);margin-bottom:5px">Additional Resources</div>
+            <a href="https://www.betterhelp.com/" target="_blank" class="tutor-resource-link">🌐 BetterHelp -- Free Online Counseling</a>
+          </div>
+        </div>
+      </div>
+      <div class="ct-card">
+        <div class="ct-card-header"><h3>📚 Tutoring</h3></div>
+        <div class="ct-card-body">
+          <p>Schedule <strong>40-minute 1:1 study sessions</strong> with BRYC's expert tutors. All subjects available!</p>
+          <ul>
+            <li>Book up to <strong>two weeks ahead</strong></li>
+            <li>Must book at least <strong>12 hours in advance</strong></li>
+            <li>Use a <strong>personal (non-school) email</strong> when signing up</li>
+            <li>Join via <strong>Google Meet link</strong> in your appointment email</li>
+          </ul>
+          <a href="http://thebryc.setmore.com/" target="_blank" class="ct-cta">Schedule a Tutoring Session →</a>
+          <div class="ct-policy"><strong>Absence Policy:</strong> Notify your session partner ASAP. CC <a href="mailto:angela@thebryc.org">angela@thebryc.org</a> on cancellations.</div>
+          <div style="margin-top:1rem">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-400);margin-bottom:5px">Tutor Resources</div>
+            <div class="tutor-resource-list">
+              <a href="https://docs.google.com/spreadsheets/d/16Mp_4FC_pMsqlgr5K9YUzc2lf1l9EPn5iUiuiG6TqKM/copy" target="_blank" class="tutor-resource-link">📋 Tutoring Session Worksheet</a>
+              <a href="http://thea.study" target="_blank" class="tutor-resource-link">🤖 Thea AI Study Tool</a>
+              <a href="https://docs.google.com/document/d/1ut40F7xnEPOV-LcT6BEt8AjZX2V1DVpv-ExFCPQJdzQ/edit" target="_blank" class="tutor-resource-link">📘 Tutoring Strategies Guide</a>
+              <a href="https://docs.google.com/spreadsheets/d/1ZavnpKElrY3LnxbBVbSWDoCvswGvb7oBt2a7w3NMM-w/edit" target="_blank" class="tutor-resource-link">🔗 Online Study Resources</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>BRYCdown &mdash; the Baton Rouge Youth Coalition Fellow Hub &nbsp;&bull;&nbsp;
+  <a href="https://thebryc.org">thebryc.org</a> &nbsp;&bull;&nbsp;
+  <a href="https://instagram.com/the_bryc">@the_bryc</a> &nbsp;&bull;&nbsp;
+  <a href="https://www.facebook.com/brycfam">Facebook</a></p>
+</footer>
+
+<script>
+  const pages = ['home','g8','g910','g11','g12','opp','ct'];
+
+  function showPage(id) {
+    pages.forEach(p => {
+      document.getElementById('page-' + p).classList.remove('active');
+      document.getElementById('nav-' + p).classList.remove('active');
+    });
+    document.getElementById('page-' + id).classList.add('active');
+    document.getElementById('nav-' + id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  // Inject CT widget into every slot
+  document.querySelectorAll('.ct-widget-slot').forEach(slot => {
+    const tpl = document.getElementById('ct-widget-tpl');
+    slot.appendChild(tpl.content.cloneNode(true));
+  });
+
+  // Load Sheet content on page load
+  window.addEventListener('DOMContentLoaded', () => {
+    loadSheetContent();
+  });
+</script>
+</body>
+</html>
